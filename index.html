@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GROK x $DRB Knowledge Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'JetBrains Mono', monospace;
+        background: #0a0a0f;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      .font-orbitron {
+        font-family: 'Orbitron', sans-serif;
+      }
+      .bg-grid {
+        background-image: 
+          linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+      }
+      .bg-noise {
+        position: relative;
+      }
+      .bg-noise::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        opacity: 0.02;
+        pointer-events: none;
+      }
+      .glow-cyan {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.05);
+      }
+      .glow-cyan-strong {
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.1);
+      }
+      .glow-text-cyan {
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3);
+      }
+      .glow-text-magenta {
+        text-shadow: 0 0 10px rgba(255, 0, 255, 0.8), 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3);
+      }
+      .gradient-title {
+        background: linear-gradient(90deg, #ff00ff, #00ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.5)) drop-shadow(0 0 40px rgba(0, 255, 255, 0.3));
+      }
+      .terminal-border {
+        border: 2px solid #00ffff;
+        background: linear-gradient(180deg, rgba(0, 20, 30, 0.95) 0%, rgba(5, 15, 25, 0.98) 100%);
+      }
+      .btn-cyber {
+        background: linear-gradient(180deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 255, 255, 0.05) 100%);
+        border: 2px solid #00ffff;
+        transition: all 0.3s ease;
+      }
+      .btn-cyber:hover {
+        background: linear-gradient(180deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 255, 255, 0.1) 100%);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      .btn-cyber:active {
+        transform: translateY(0);
+      }
+      .option-btn {
+        background: rgba(0, 30, 40, 0.8);
+        border: 1px solid rgba(0, 255, 255, 0.3);
+        transition: all 0.2s ease;
+      }
+      .option-btn:hover {
+        border-color: #00ffff;
+        background: rgba(0, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+      }
+      .option-btn.correct {
+        border-color: #00ff00;
+        background: rgba(0, 255, 0, 0.2);
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      }
+      .option-btn.wrong {
+        border-color: #ff0040;
+        background: rgba(255, 0, 64, 0.2);
+        box-shadow: 0 0 20px rgba(255, 0, 64, 0.5);
+      }
+      .scanline {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.1) 0px,
+          rgba(0, 0, 0, 0.1) 1px,
+          transparent 1px,
+          transparent 2px
+        );
+        pointer-events: none;
+        opacity: 0.3;
+      }
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+      }
+      .cursor-blink {
+        animation: blink 1s infinite;
+      }
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1); }
+        50% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2); }
+      }
+      .pulse-border {
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-slide-up {
+        animation: slideUp 0.5s ease-out forwards;
+      }
+      @keyframes typewriter {
+        from { width: 0; }
+        to { width: 100%; }
+      }
+      .streak-counter {
+        background: linear-gradient(135deg, rgba(255, 0, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%);
+        border: 2px solid;
+        border-image: linear-gradient(135deg, #ff00ff, #00ffff) 1;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 20, 30, 0.5);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0, 255, 255, 0.3);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 255, 255, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
